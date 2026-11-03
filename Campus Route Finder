@@ -1,0 +1,132 @@
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <queue>
+#include <stack>
+#include <set>
+
+using namespace std;
+
+class CampusGraph {
+private:
+    unordered_map<string, vector<string>> graph;
+
+public:
+    void addEdge(string u, string v) {
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+
+    void displayGraph() {
+        cout << "\nAdjacency List:\n";
+        for (auto node : graph) {
+            cout << node.first << " -> ";
+            for (auto neighbour : node.second)
+                cout << neighbour << " ";
+            cout << endl;
+        }
+    }
+
+    void BFS(string start, string destination) {
+        queue<string> q;
+        set<string> visited;
+        unordered_map<string, string> parent;
+
+        q.push(start);
+        visited.insert(start);
+        parent[start] = "";
+
+        while (!q.empty()) {
+            string current = q.front();
+            q.pop();
+
+            if (current == destination) {
+                vector<string> path;
+
+                while (current != "") {
+                    path.push_back(current);
+                    current = parent[current];
+                }
+
+                cout << "\nShortest Route (BFS): ";
+                for (int i = path.size() - 1; i >= 0; i--) {
+                    cout << path[i];
+                    if (i != 0) cout << " -> ";
+                }
+                cout << endl;
+                return;
+            }
+
+            for (string neighbour : graph[current]) {
+                if (!visited.count(neighbour)) {
+                    visited.insert(neighbour);
+                    parent[neighbour] = current;
+                    q.push(neighbour);
+                }
+            }
+        }
+
+        cout << "\nNo Route Found!\n";
+    }
+
+    void DFSUtil(string node, set<string>& visited) {
+        visited.insert(node);
+        cout << node << " ";
+
+        for (string neighbour : graph[node]) {
+            if (!visited.count(neighbour))
+                DFSUtil(neighbour, visited);
+        }
+    }
+
+    void DFS(string start) {
+        set<string> visited;
+
+        cout << "\nDFS Traversal: ";
+        DFSUtil(start, visited);
+        cout << endl;
+
+        cout << "\nReachable Locations:\n";
+        for (auto x : visited)
+            cout << x << endl;
+
+        cout << "\nDisconnected Locations:\n";
+        for (auto location : graph) {
+            if (!visited.count(location.first))
+                cout << location.first << endl;
+        }
+    }
+};
+
+int main() {
+
+    CampusGraph campus;
+
+    campus.addEdge("MainGate", "Library");
+    campus.addEdge("MainGate", "Parking");
+    campus.addEdge("Library", "Block1");
+    campus.addEdge("Block1", "Block2");
+    campus.addEdge("Block2", "Lab");
+    campus.addEdge("Library", "Cafeteria");
+    campus.addEdge("Cafeteria", "Auditorium");
+    campus.addEdge("Parking", "Auditorium");
+
+    campus.displayGraph();
+
+    string source, destination;
+
+    cout << "\nEnter Source: ";
+    cin >> source;
+
+    cout << "Enter Destination: ";
+    cin >> destination;
+
+    campus.BFS(source, destination);
+
+    cout << "\nDFS Starting Location: ";
+    cin >> source;
+
+    campus.DFS(source);
+
+    return 0;
+}
